@@ -47,10 +47,10 @@ workflows:
       - build
       - test
           requires:
-           - build
+            - build
       - analyze
           requires: 
-           - test
+            - test
 
 
 # Chris added this to set sync with CircleCI
