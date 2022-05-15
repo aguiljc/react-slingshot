@@ -2,17 +2,11 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-commands:
- print_pipeline_id:
-    description: "Test Command"
-    steps:
-      - run: echo $CIRCLE_WORKFLOW_ID
-
-
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  say-hello:
+
+  build:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -21,100 +15,40 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+      - run: nmp 1
+      - save_cache:
+          key: "npm-packages"
+          paths: 
+           - /src/
+      - run: npm run lint
 
-  print-hello:
-    # Udacity class requirement for a "print hello" job
-    docker: 
-      - image: cimg/base:stable
-    # adding job steps
-    steps:
-     - checkout
-     - run:
-          name: "Print Hello"
-          command: "echo Hello" 
-    
-  print-world:
-    # Udacity class requirement for a "print world" job
-    docker: 
-      - image: cimg/base:stable
-    # adding job steps
-    steps:
-     - checkout
-     - run:
-          name: "Print World"
-          command: "echo World"  
-  
-  print-myname:
-    # Udacity class requirement for a "print hello" job
-    docker: 
-      - image: cimg/base:stable
-    # adding job steps
-    steps:
-     - print_pipeline_id
-     - run:
-          name: "Print My Name"
-          command: echo $MY_NAME_ENVAR
-          
-     - run:
-          command: return 1
-          
-     - run: 
-          name: "Failure Handle"
-          command: echo "Failure Caught!"
-          when: on_fail
 
-  # save_hello_world_output:
-  #   docker: 
-  #     - image: cimg/base:stable
-  #   # adding job steps
-  #   steps:
-  #    - run: mkdir -p workspace
-  #    - run:
-  #         name: "Write My Hello World to File"
-  #         command: echo "Hello World" > output.txt
-  #    - persist_to_workspace:
-  #       root: workspace
-  #       paths: 
-  #        - output.txt
-
-  save_hello_world_output:
+  test: 
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
       - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
-      - run: echo "hello world" > ~/output.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - output.txt
 
-  print_output_file:
-    docker: 
+  analyze: 
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
       - image: cimg/base:stable
-    # adding job steps
-    steps:
-     - attach_workspace:
-        at: ~/
-     - run: cat ~/output.txt
-
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps: 
+  
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  # say-hello-workflow:
-  #   jobs:
-  #     - say-hello
-  print-hello-world-workflow:
+  build-test-analyze-workflow:
     jobs:
-      # - print-hello
-      # - print-world:
-      #     requires:
-      #       - print-hello   
-      - print-myname
-      # - save_hello_world_output
-      # - print_output_file:
-      #         requires:
-      #           - save_hello_world_output
+      - build
+      # - test
+      # - analyze
+
 
 # Chris added this to set sync with CircleCI
